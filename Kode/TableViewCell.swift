@@ -11,4 +11,5 @@ class TableViewCell: UITableViewCell {
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var imageLabel: UIImageView!
     @IBOutlet weak var departamentLabel: UILabel!
+    @IBOutlet weak var tagLabel: UILabel!
 }

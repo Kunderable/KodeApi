@@ -21,27 +21,41 @@ extension TableViewController: UICollectionViewDelegate, UICollectionViewDataSou
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
         
+        let cell = collectionView.cellForItem(at: indexPath) as! CollectionViewCell
+        
+        if let department = Departament(rawValue: cell.positionLabel.text ?? "") {
+            if department == .all {
+                filtredUsers = users
+            } else {
+                filtredUsers = users.filter({ $0.department == String(describing: department) })
+            }
+            
+            tableView.reloadData()
+        }
     }
 }
 
-extension TableViewController: UISearchBarDelegate {
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        view.endEditing(true)
+extension TableViewController: UISearchBarDelegate, UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        if let searchText  = searchController.searchBar.text {
+            filterContentForSearchText(searchText)
+            tableView.reloadData()
+        }
     }
     
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        if searchBar.text == nil || searchBar.text == "" {
-            inSearchMode = false
-            
-            view.endEditing(true)
+    func filterContentForSearchText(_ searchText: String) {
+        if !searchText.isEmpty {
+            filtredUsers = users.filter({ (user: Item) -> Bool in
+                let firstTitle  = user.firstName.range(of: searchText, options: NSString.CompareOptions.caseInsensitive)
+                let lastTitle = user.lastName.range(of: searchText, options: NSString.CompareOptions.caseInsensitive)
+                let tag = user.userTag.range(of: searchText, options: NSString.CompareOptions.caseInsensitive)
+                return firstTitle != nil || lastTitle != nil || tag != nil
+            })
         } else {
-            inSearchMode = true
-            let lower = searchText.lowercased()
-            
-            filtredUsers = users.filter({ $0.firstName.range(of: lower) != nil})
+            filtredUsers = users
         }
-        tableViews.reloadData()
     }
 }
 

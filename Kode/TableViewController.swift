@@ -10,7 +10,6 @@ import Kingfisher
 
 class TableViewController: UITableViewController {
     
-    @IBOutlet var tableViews: UITableView!
     @IBOutlet weak var arrayDepartament: UICollectionView!
     var users: [Item] = []
     var filtredUsers: [Item] = []
@@ -29,18 +28,17 @@ class TableViewController: UITableViewController {
         arrayDepartament.dataSource = self
         searchingBar()
         fetch()
-        tableViews.refreshControl = myRefreshControl
-        
+        tableView.refreshControl = myRefreshControl
     }
     
     private func searchingBar() {
         searchBar.searchBar.delegate = self
+        searchBar.searchResultsUpdater =  self
         navigationItem.searchController = searchBar
         searchBar.obscuresBackgroundDuringPresentation = false
-        searchBar.searchBar.placeholder = "Введите имя, тег, почту"
+        searchBar.searchBar.placeholder = "Введите имя, тег, почту..."
         searchBar.searchBar.setImage(UIImage(named: "filter"), for: .bookmark, state: .normal)
         searchBar.searchBar.setPositionAdjustment(UIOffset(horizontal: 0, vertical: 0), for: .bookmark)
-        definesPresentationContext = true
         
         if searchBar.isActive {
             searchBar.searchBar.showsBookmarkButton = false
@@ -54,13 +52,15 @@ class TableViewController: UITableViewController {
     }
     
     @objc private func pullToRefresh(sender: UIRefreshControl) {
-        tableViews.reloadData()
+        filtredUsers = users
+        tableView.reloadData()
         sender.endRefreshing()
     }
     
     private func fetch() {
         Networking.arrayUser(url: urlString) { [weak self] user in
             self?.users = user
+            self?.filtredUsers = user
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
             }
@@ -73,33 +73,22 @@ class TableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if inSearchMode {
-            return filtredUsers.count
-        } else {
-            return users.count
-        }
+        return filtredUsers.count
     }
-
    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! TableViewCell
         
-        let user: Item!
+        let user = filtredUsers[indexPath.row]
         
-        if inSearchMode {
-            user = filtredUsers[indexPath.row]
-        } else {
-            user = users[indexPath.row]
-        }
+        cell.nameLabel.text = String("\(user.firstName) \(user.lastName)")
+        cell.departamentLabel.text = user.position
+        cell.tagLabel.text = user.userTag.lowercased()
         
-        cell.nameLabel.text = String("\(self.users[indexPath.row].firstName) \(self.users[indexPath.row].lastName)")
-        cell.departamentLabel.text = users[indexPath.row].position
-        
-        let url = URL(string: users[indexPath.row].avatarURL)
+        let url = URL(string: user.avatarURL)
         cell.imageLabel.kf.setImage(with: url, placeholder: #imageLiteral(resourceName: "person"), options: [.transition(.fade(0.4)),.processor(DownsamplingImageProcessor(size: cell.imageLabel.frame.size)),
                                                  .cacheOriginalImage])
         cell.imageLabel.layer.cornerRadius = 10
-        
         
         return cell
     }
