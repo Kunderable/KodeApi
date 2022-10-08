@@ -37,7 +37,8 @@ class TableViewController: UITableViewController {
         navigationItem.searchController = searchBar
         searchBar.obscuresBackgroundDuringPresentation = false
         searchBar.searchBar.placeholder = "Введите имя, тег, почту..."
-        searchBar.searchBar.setImage(UIImage(named: "filter"), for: .bookmark, state: .normal)
+        searchBar.searchBar.layer.cornerRadius = 10
+        searchBar.searchBar.setImage(UIImage(named: "Vector"), for: .bookmark, state: .normal)
         searchBar.searchBar.setPositionAdjustment(UIOffset(horizontal: 0, vertical: 0), for: .bookmark)
         
         if searchBar.isActive {
@@ -48,7 +49,9 @@ class TableViewController: UITableViewController {
     }
     
     func searchBarBookmarkButtonClicked(_ searchBar: UISearchBar) {
-        
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let vc = storyboard.instantiateViewController(withIdentifier: "VC") as? ViewController else { return }
+        self.present(vc, animated: true)
     }
     
     @objc private func pullToRefresh(sender: UIRefreshControl) {
@@ -79,11 +82,13 @@ class TableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! TableViewCell
         
+        
         let user = filtredUsers[indexPath.row]
         
         cell.nameLabel.text = String("\(user.firstName) \(user.lastName)")
         cell.departamentLabel.text = user.position
         cell.tagLabel.text = user.userTag.lowercased()
+        
         
         let url = URL(string: user.avatarURL)
         cell.imageLabel.kf.setImage(with: url, placeholder: #imageLiteral(resourceName: "person"), options: [.transition(.fade(0.4)),.processor(DownsamplingImageProcessor(size: cell.imageLabel.frame.size)),

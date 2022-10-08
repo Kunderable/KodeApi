@@ -16,7 +16,7 @@ class Networking {
 
             do {
                 let decoder = JSONDecoder()
-                let user = try decoder.decode(Kode.self, from: data).items
+                let user = try decoder.decode(Kode.self, from: data).items.sorted(by: {$0.firstName < $1.firstName})
                 comletion(user)
             } catch {
                 print("Не получилось")
