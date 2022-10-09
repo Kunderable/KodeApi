@@ -36,6 +36,8 @@ class TableViewController: UITableViewController {
         searchBar.searchResultsUpdater =  self
         navigationItem.searchController = searchBar
         searchBar.obscuresBackgroundDuringPresentation = false
+        UIBarButtonItem.appearance().tintColor = #colorLiteral(red: 0.482652545, green: 0.2100374699, blue: 1, alpha: 1)
+        UIBarButtonItem.appearance().title = "Отмена"
         searchBar.searchBar.placeholder = "Введите имя, тег, почту..."
         searchBar.searchBar.layer.cornerRadius = 10
         searchBar.searchBar.setImage(UIImage(named: "Vector"), for: .bookmark, state: .normal)
@@ -70,6 +72,16 @@ class TableViewController: UITableViewController {
         }
     }
     // MARK: - Table view data source
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let user = filtredUsers[indexPath.row]
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let vc = storyboard.instantiateViewController(withIdentifier: "detailVC") as? DetailViewController else { return }
+        vc.user = user
+        
+        navigationController?.pushViewController(vc, animated: true)
+        
+    }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
